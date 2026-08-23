@@ -1,10 +1,10 @@
 # git-workflow (Claude Code 技能)
 
-Claude Code 的一个**用户级技能**，套用本项目组统一的 Git 提交与分支规范，覆盖两个独立仓库：**NexusCore**（后端 / Payload 控制平面）与 **Snipix**（前端 web + Chrome 扩展）。
+Claude Code 的一个**用户级技能**，统一 Git 提交与分支规范，**适用于任意项目**；当项目是多仓库（如后端 + 前端拆分、控制面 + 站点）时，每个仓库各自独立 git、禁止混合提交。
 
 - 提交信息按前置前缀标注性质：`feat / fix / docs / style / refactor / chore / revert / perf / test / improvement / build / ci`。
 - 分支模型 `main + release-xxx + dev + test + feature + hotfix`：只有 `feature` / `hotfix` 允许直接提交，`main / release / dev / test` 只经合并流入。
-- 两个 repo 各自的 git 独立维护，禁止混合提交；提交前扫敏感项，不提交 `.env` / 密钥。
+- 多仓库各自独立 git；提交前扫敏感项，不提交 `.env` / 密钥。
 
 ---
 
@@ -45,7 +45,7 @@ cp git-workflow/SKILL.md ~/.claude/skills/git-workflow/
 
 ### 自动生效
 
-在任意涉及 NexusCore / Snipix 的 Git 操作中，Claude 会：
+在任意项目的 Git 操作中，Claude 会：
 
 1. 先 `git status` / `git branch --show-current` 确认**仓库与分支**。
 2. 新功能/修复 → 基于 `main` 建 `feature/<编号>` 或 `hotfix/<编号>` 分支，在其上提交。

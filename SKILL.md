@@ -1,19 +1,15 @@
 ---
 name: git-workflow
-description: "两个独立 git 仓库（NexusCore 后端 / Snipix 前端）的提交与分支约定：提交信息按 Commit 规范标注类型；分支模型为 main/release/dev/test/feature/hotfix，只有 feature 与 hotfix 可直接提交，其余分支禁止直接改。使用时：准备 git commit / 切分支 / 合并 / push 时遵循此 skill。"
+description: "通用 Git 提交与分支约定（Claude Code 技能）：commit 前缀按 Commit 规范标注类型；分支模型为 main/release-xxx/dev/test/feature/hotfix，只有 feature 与 hotfix 可直接提交，其余分支禁止直接改。多仓库场景各自独立 git、禁止混合提交。使用时：准备 git commit / 切分支 / 合并 / push 时遵循此 skill。"
 ---
 
-# Git 工作流（双仓库 · Commit 规范 + 分支模型）
+# Git 工作流（Commit 规范 + 分支模型）
 
-## 适用仓库（各自独立 git，分开提交与推送，禁止混合）
+## 适用范围（多仓库时各自独立维护）
 
-| 仓库 | 路径 | 角色 |
-| --- | --- | --- |
-| **NexusCore** | `E:\Coding\NexusCore` | Payload 各类 SaaS 后端 / 控制平面（auth、billing、media/COS、配额、API） |
-| **Snipix** | `E:\Coding\Snipix` | 前端 web + Chrome 扩展（workspace 编辑器、媒体面板、定价/个人中心等） |
-
-- 前端（Snipix）经 BFF/Platform API 调后端（NexusCore）；同一条 feature 可能横跨两仓，但**提交/推送**必须分仓库各自进行。
-- 每个 repo 先 `git status` / `git branch --show-current` 看清是哪个仓库、在哪个分支，再动手。
+- 可套用于**任意项目**；项目含多仓库（如「后端 + 前端」拆分、或控制面 + 站点）时尤其适用。
+- **每个仓库各自独立 git，提交/推送分开进行、禁止混合提交**：一条跨仓库的 feature 可能在多个仓库落改动，但每个仓库单独提交、单独推送。
+- 动手前先 `git status` / `git branch --show-current` 确认是在哪个仓库、哪个分支。
 
 ## 一、Commit 提交规范
 
@@ -39,7 +35,7 @@ description: "两个独立 git 仓库（NexusCore 后端 / Snipix 前端）的�
 | 分支 | 用途 | 是否允许直接改/提交 |
 | --- | --- | --- |
 | **main** | 线上最稳定、理论可上线 | **禁止**直接修改提交 |
-| **release**(release-xxx) | 上线前预发布环境 | **禁止**直接修改提交；验收通过后合并到 main 并打 tag |
+| **release**（release-xxx） | 上线前预发布环境 | **禁止**直接修改提交；验收通过后合并到 main 并打 tag |
 | **dev** | 开发环境 | **禁止**直接修改提交 |
 | **test** | 测试环境 | **禁止**直接修改提交 |
 | **feature**（feature/00001） | 基于 main checkout，开发新功能 | **允许**直接修改提交 |
@@ -60,7 +56,7 @@ description: "两个独立 git 仓库（NexusCore 后端 / Snipix 前端）的�
 
 1. 明确当前仓库与分支：`git status` + `git branch --show-current`。
 2. 若是新功能/修复 → 基于 main 建 `feature/<编号>` 或 `hotfix/<编号>` 分支，在其上提交。
-3. 归类提交：按上表选对前缀；一个逻辑单元一个提交；无关改动不混入（`git add -A` 慎用，按文件分组提交）。
+3. 归类提交：按上表选对前缀；一个逻辑单元一个提交；无关改动不混入（慎用 `git add -A`，按文件分组提交）。
 4. 合并流：feature → dev（开发）→ test（提测）→ release-xxx（预发布）→ main + tag（上线验收）。
 5. push 只推 feature/hotfix 分支（或用户明确的合并请求）；**不直接 push/提交到 main/release/dev/test**；绝不用 `--force`。
 6. 涉及 `main` / `release` 的合并或上线前，先与用户确认要推的分支与 tag 版本。
@@ -69,4 +65,4 @@ description: "两个独立 git 仓库（NexusCore 后端 / Snipix 前端）的�
 
 - 绝不提交 `.env`、密钥、令牌（凭据进 gitignore 的 `.env`，不入库）。
 - 提交前对 diff 做敏感项扫描（`AKID`、`sk-`、`secret`/`password`、`BEGIN PRIVATE` 等）。
-- 其他会话/用户产出的改动按「用户产出」对待：保留现状、可代为提交但归入对应 feature 提交，不擅自改动内容方向。
+- 其他会话/协作者产出的改动按「他人产出」对待：保留现状、可代为提交但归入对应 feature 提交，不擅自改动内容方向。
