@@ -34,6 +34,18 @@ cp git-workflow/SKILL.md ~/.claude/skills/git-workflow/
 ~/.claude/skills/git-workflow/SKILL.md   (Windows: C:\Users\<用户名>\.claude\skills\git-workflow\SKILL.md)
 ```
 
+### 方式三：一键安装脚本
+
+克隆仓库后在仓库根目录执行脚本，自动把 `SKILL.md` 复制到正确的用户级技能目录（幂等，可重复执行）：
+
+```bash
+# macOS / Linux / WSL
+bash install.sh
+
+# Windows PowerShell
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
 ### 生效
 
 - **重启 Claude Code 或新开会话**后，技能会被自动发现并载入。
