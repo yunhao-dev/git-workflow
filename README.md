@@ -10,33 +10,36 @@ Claude Code 的一个**用户级技能**，统一 Git 提交与分支规范，**
 
 ## 安装
 
-Claude Code 技能放在 `~/.claude/skills/<skill-name>/SKILL.md`（个人级，所有项目可见）或项目的 `.claude/skills/<skill-name>/SKILL.md`（仅该项目）。安装本技能：
+Claude Code 技能放在 `~/.claude/skills/<skill-name>/SKILL.md`（个人级，所有项目可见）或项目的 `.claude/skills/<skill-name>/SKILL.md`（仅该项目）。
 
-### 方式一：克隆整个仓库（推荐）
+### 方式一（推荐）：把链接发给 Claude，直接装
 
-```bash
-git clone git@github.com:yunhao-dev/git-workflow.git
-# macOS / Linux
-mkdir -p ~/.claude/skills/git-workflow
-cp git-workflow/SKILL.md ~/.claude/skills/git-workflow/
-# Windows（PowerShell）
-# mkdir $HOME\.claude\skills\git-workflow
-# copy git-workflow\SKILL.md $HOME\.claude\skills\git-workflow\
-```
-
-> 也可以直接把 `git-workflow` 整个目录连同 `SKILL.md` 一并拷贝到 `~/.claude/skills/` 下（README 可保留，无害）。
-
-### 方式二：仅手动复制 SKILL.md
-
-把本仓库根目录的 `SKILL.md` 复制到：
+把下面的仓库链接发给任意 Claude Code 会话，让 Claude 自己克隆并安装：
 
 ```text
-~/.claude/skills/git-workflow/SKILL.md   (Windows: C:\Users\<用户名>\.claude\skills\git-workflow\SKILL.md)
+https://github.com/yunhao-dev/git-workflow.git
 ```
 
-### 方式三：一键安装脚本
+可直接粘贴这段指令给 Claude：
 
-克隆仓库后在仓库根目录执行脚本，自动把 `SKILL.md` 复制到正确的用户级技能目录（幂等，可重复执行）：
+```text
+请安装技能「git-workflow」：
+克隆 https://github.com/yunhao-dev/git-workflow.git 到临时目录，
+把其中的 SKILL.md 复制到用户级技能目录
+~/.claude/skills/git-workflow/SKILL.md
+（Windows 为 C:\Users\<用户名>\.claude\skills\git-workflow\SKILL.md）。
+装好后告诉我，重启 Claude Code 即生效。
+```
+
+等价做法：把单文件地址发给 Claude，让它抓取内容并写入上述路径：
+
+```text
+https://raw.githubusercontent.com/yunhao-dev/git-workflow/main/SKILL.md
+```
+
+### 方式二：一键安装脚本
+
+克隆仓库后在仓库根目录执行脚本（幂等，可重复执行）：
 
 ```bash
 # macOS / Linux / WSL
@@ -44,6 +47,14 @@ bash install.sh
 
 # Windows PowerShell
 powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+### 方式三：手动复制
+
+把仓库根目录的 `SKILL.md` 复制到：
+
+```text
+~/.claude/skills/git-workflow/SKILL.md   (Windows: C:\Users\<用户名>\.claude\skills\git-workflow\SKILL.md)
 ```
 
 ### 生效
