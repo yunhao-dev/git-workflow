@@ -1,6 +1,6 @@
 ---
 name: git-workflow
-description: "通用 Git 提交与分支约定（Claude Code 技能）：commit 前缀按 Commit 规范标注类型；分支模型为 main/release-xxx/dev/test/feature/hotfix，只有 feature 与 hotfix 可直接提交，其余分支禁止直接改。多仓库场景各自独立 git、禁止混合提交。使用时：准备 git commit / 切分支 / 合并 / push 时遵循此 skill。"
+description: "通用 Git 提交与分支约定（Claude Code 技能）：commit 前缀按 Commit 规范标注类型；分支模型为 main/release-xxx/dev/test/feature/hotfix，只有 feature 与 hotfix 可直接提交，其余分支禁止直接改；推送 main 前打版本 tag 并给出与上一 tag 之间的变更说明。多仓库场景各自独立 git、禁止混合提交。使用时：准备 git commit / 切分支 / 合并 / 打 tag / 推送 / 写发布说明时遵循此 skill。"
 ---
 
 # Git 工作流（Commit 规范 + 分支模型）
@@ -61,7 +61,21 @@ description: "通用 Git 提交与分支约定（Claude Code 技能）：commit 
 5. push 只推 feature/hotfix 分支（或用户明确的合并请求）；**不直接 push/提交到 main/release/dev/test**；绝不用 `--force`。
 6. 涉及 `main` / `release` 的合并或上线前，先与用户确认要推的分支与 tag 版本。
 
-## 五、安全
+## 五、版本 Tag 与发布说明（推送 main 前必做）
+
+上线（feature/hotfix 合并入 main）后、推送**之前**：
+
+1. **确认 tag 版本**：与项目版本号一致（如 `package.json` version、构建产物 `AgentBell-0.1.0-…` → tag `v0.1.0`）。版本规则沿用语义化版本；是否更新版本号（minor/patch）由发布内容决定，先与用户确认。
+2. **查看上一个 tag**：`git tag -l`；存在则记录其哈希 `TAG=$(git rev-parse <上一tag>)`。
+3. **打注释 tag**：`git tag -a v<版本> -m "<版本>：<一句话发布主题>"`（记录打 tag 人、时间与说明，不用轻量 tag）。
+4. **推送 main 与 tag**：`git push origin main && git push origin v<版本>`。只按用户指引推 main/tag，绝不 `--force`。
+5. **写「与上一 tag 之间」的发布说明**：
+   - 区间：`git log --oneline <上一tag>..v<新tag>`（feature 合并进来的全部提交）；**没有上一 tag 时为首个 tag**，说明从仓库起点（或最近一次既定的产品基线）起的全量内容。
+   - 组织：按 commit 前缀归类（`feat:`/`fix:`/`docs:`/`refactor:`/`chore:` 等），每条说明「改了什么、为什么、影响或验证」。
+   - 必须包含：关键产品/行为决策（如默认值反转、支付渠道、试用策略）、数据库/配置迁移、需要部署方配合的变更（如 NexusCore 配套迁移）、验证结果（测试数量/构建/smoke 结论）。
+   - 多仓库：每个仓库各自的 tag 与发布说明分开写；先写主仓库，再注明配套仓库的 tag 与说明位置。
+
+## 六、安全
 
 - 绝不提交 `.env`、密钥、令牌（凭据进 gitignore 的 `.env`，不入库）。
 - 提交前对 diff 做敏感项扫描（`AKID`、`sk-`、`secret`/`password`、`BEGIN PRIVATE` 等）。
