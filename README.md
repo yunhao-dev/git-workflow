@@ -4,6 +4,7 @@ Claude Code 的一个**用户级技能**，统一 Git 提交与分支规范，**
 
 - 提交信息按前置前缀标注性质：`feat / fix / docs / style / refactor / chore / revert / perf / test / improvement / build / ci`。
 - 分支模型 `main + release-xxx + dev + test + feature + hotfix`：只有 `feature` / `hotfix` 允许直接提交，`main / release / dev / test` 只经合并流入。
+- `main` 推送、部署标记与正式版本 Tag 相互独立；部署期连续修复不会自动抬高产品版本号。
 - 多仓库各自独立 git；提交前扫敏感项，不提交 `.env` / 密钥。
 
 ---
@@ -74,7 +75,7 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 2. 新功能/修复 → 基于 `main` 建 `feature/<编号>` 或 `hotfix/<编号>` 分支，在其上提交。
 3. 按 Commit 前缀表给提交信息标注类型（如 `feat: ...`、`fix: ...`）。
 4. 不混入无关改动（按文件分组提交，慎用 `git add -A`）。
-5. 合并按 flow：`feature → dev → test → release-xxx → main + tag`；push 只推 feature/hotfix 或用户明确的合并请求；不直接改 `main / release / dev / test`，绝不用 `--force`。
+5. 合并按 flow：`feature → dev → test → release-xxx → main`；正式版本 Tag 只在明确发布新版本时创建，部署重试或部署期修复不自动递增版本号；push 只推 feature/hotfix 或用户明确的合并请求；不直接改 `main / release / dev / test`，绝不用 `--force`。
 6. 提交前扫描敏感项，不提交 `.env` / 令牌。
 
 ### 手动触发
@@ -107,9 +108,16 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 
 | 分支 | 允许直接提交 |
 | --- | --- |
-| `main`（线上稳定） | ❌ 禁止；由 release-xxx 验收后合并 + 打 tag |
+| `main`（线上稳定） | ❌ 禁止；由 release-xxx 验收后合并，是否打版本 Tag 单独判断 |
 | `release-xxx`（预发布） | ❌ 禁止 |
 | `dev`（开发） / `test`（测试） | ❌ 禁止 |
 | `feature` / `hotfix`（基于 main 切出） | ✅ 允许 |
 
-**开发流程**：`feature/00001`（基于 main）→ 合 `dev`（开发环境）→ 合 `test`（提测，bug 在 feature 上修并反复合并）→ 基于 main 建 `release-xxx` 合入待上线 feature → 上线验收 → 合 `main` + 打 tag → 删 `release-xxx` 与 `feature` 分支。hotfix 同 feature。
+**开发流程**：`feature/00001`（基于 main）→ 合 `dev`（开发环境）→ 合 `test`（提测，bug 在 feature 上修并反复合并）→ 基于 main 建 `release-xxx` 合入待上线 feature → 上线验收 → 合 `main` → 仅在明确形成新版本时打 Tag → 删 `release-xxx` 与 `feature` 分支。hotfix 同 feature。
+
+### Tag 规则
+
+- 正式版本只使用 `vMAJOR.MINOR.PATCH`，例如 `v2.4.1`；普通 main 推送默认不打 Tag，也不改版本号。
+- 同一次部署中连续修复多个问题时，先反复部署提交进行验证，稳定后只在最终提交上打一次正式版本 Tag。
+- 如果部署平台必须依赖 Tag 触发，可使用 `deploy/prod/20260903-01` 这类部署标记；自动版本计算应只识别 `vMAJOR.MINOR.PATCH`。
+- 已推送的 Tag 不移动、不覆盖。正式版本发布后的行为修复如需再次对外发布，递增 patch 版本。
