@@ -4,7 +4,7 @@ Claude Code 的一个**用户级技能**，统一 Git 提交与分支规范，**
 
 - 提交信息按前置前缀标注性质：`feat / fix / docs / style / refactor / chore / revert / perf / test / improvement / build / ci`。
 - 分支模型 `main + release-xxx + dev + test + feature + hotfix`：只有 `feature` / `hotfix` 允许直接提交，`main / release / dev / test` 只经合并流入。
-- `main` 推送、部署标记与正式版本 Tag 相互独立；部署期连续修复不会自动抬高产品版本号。
+- `main` 推送、部署标记与正式版本 Tag 相互独立；正式版本支持可选的第四段 REVISION，部署期连续修复不会挤占 PATCH。
 - 多仓库各自独立 git；提交前扫敏感项，不提交 `.env` / 密钥。
 
 ---
@@ -117,7 +117,10 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 
 ### Tag 规则
 
-- 正式版本只使用 `vMAJOR.MINOR.PATCH`，例如 `v2.4.1`；普通 main 推送默认不打 Tag，也不改版本号。
+- 正式版本可选标准三段 `vMAJOR.MINOR.PATCH`，或四段修订版 `vMAJOR.MINOR.PATCH.REVISION`；例如 `v2.4.1.12` 的第四段表示同一功能版本下第 12 次对外修订。
+- 四段格式不是标准 SemVer，使用前需确认工具链支持；只接受 SemVer 的项目可使用 `v2.4.1-rev.12`。
+- 项目一旦选定三段或四段模式应保持一致。由三段迁移时，将已有 `vX.Y.Z` 视作 `vX.Y.Z.0`，下一个修订使用 `vX.Y.Z.1`，不移动旧 Tag。
+- 普通 main 推送、部署重试和未交付的修复默认不打 Tag，也不改版本号；四段模式仅在确实交付新修订产物时递增 REVISION。
 - 同一次部署中连续修复多个问题时，先反复部署提交进行验证，稳定后只在最终提交上打一次正式版本 Tag。
-- 如果部署平台必须依赖 Tag 触发，可使用 `deploy/prod/20260903-01` 这类部署标记；自动版本计算应只识别 `vMAJOR.MINOR.PATCH`。
-- 已推送的 Tag 不移动、不覆盖。正式版本发布后的行为修复如需再次对外发布，递增 patch 版本。
+- 如果部署平台必须依赖 Tag 触发，可使用 `deploy/prod/20260904-01` 这类部署标记；它不参与版本计算。
+- 已推送的 Tag 不移动、不覆盖。正式版本发布后的行为修复如需再次对外发布，三段模式递增 PATCH，四段模式优先递增 REVISION。
